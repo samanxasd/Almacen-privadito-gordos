@@ -1,1 +1,13 @@
-
+{
+  "name": "christmas-manager",
+  "version": "1.0.0",
+  "description": "Christmas Manager App",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve",
+    "build": "echo 'No build step needed'"
+  },
+  "dependencies": {
+    "serve": "^14.0.0"
+  }
+}
