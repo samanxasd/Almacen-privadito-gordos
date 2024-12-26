@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>✨ Christmas Manager ✨</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Variables y configuración base */
+        :root {
+            --primary: #ff2d55;
+            --primary-dark: #e60033;
+            --secondary: #34c759;
+            --accent: #5856d6;
+            --dark: #1c1c1e;
+            --darker: #0a0a0a;
+            --light: #ffffff;
+            --gold: #ffd700;
+            --red-gradient: linear-gradient(145deg, #ff2d55 0%, #ff3b30 100%);
+            --green-gradient: linear-gradient(145deg, #34c759 0%, #30d158 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--darker);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: radial-gradient(circle at top right, #1a1a1a 0%, var(--darker) 100%);
+        }
+
+        /* Efecto de nieve */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: white;
+            font-size: 1em;
+            text-shadow: 0 0 5px rgba(255,255,255,0.3);
+            z-index: 1;
+            pointer-events: none;
+            animation: snowfall linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes snowfall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Efecto de brillo */
+        .glow {
+            position: fixed;
+            width: 50vw;
+            height: 50vw;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,45,85,0.1) 0%, rgba(255,45,85,0) 70%);
+            pointer-events: none;
+            z-index: 0;
+            animation: glowMove 15s ease-in-out infinite;
+        }
+
+        @keyframes glowMove {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(20vw, 20vh); }
+            50% { transform: translate(-20vw, 40vh); }
+            75% { transform: translate(10vw, -20vh); }
+        }
+
+        /* Sidebar mejorado */
+        .sidebar {
+            width: 300px;
+            height: 100vh;
+            background: rgba(28, 28, 30, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 20px 0;
+            box-shadow: var(--glass-shadow);
+            z-index: 100;
+            transition: var(--transition-smooth);
+            border-right: 1px solid var(--glass-border);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .app-title {
+            padding: 20px;
+            font-size: 24px;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--glass-bg);
+            border-radius: 15px;
+            margin: 0 15px 20px;
+        }
+
+        .app-title .icon {
+            font-size: 1.5em;
+            animation: titleGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 5px rgba(255,45,85,0.5); }
+            50% { text-shadow: 0 0 20px rgba(255,45,85,0.8); }
+        }
+
+        .menu-item {
+            padding: 15px 20px;
+            margin: 5px 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--light);
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            border-radius: 12px;
+            background: var(--glass-bg);
+            border: 1px solid transparent;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(5px);
+            border-color: var(--glass-border);
+        }
+
+        .menu-item.active {
+            background: var(--red-gradient);
+            box-shadow: 0 5px 15px rgba(255,45,85,0.3);
+        }
+
+        .menu-item .icon {
+            font-size: 1.3em;
+            transition: var(--transition-smooth);
+            width: 30px;
+            text-align: center;
+        }
+
+        .menu-item:hover .icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .menu-item .text {
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+        /* Estilos de las secciones y contenido */
+        .section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at top right, #1a1a1a 0%, var(--darker) 100%);
+            padding: 30px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: var(--transition-smooth);
+            overflow-y: auto;
+            visibility: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .section.active {
+            transform: translateX(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--primary);
+            font-size: 24px;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            z-index: 101;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            transform: scale(1.1);
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .section-content {
+            max-width: 800px;
+            margin: 60px auto 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-title {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: var(--light);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: var(--glass-bg);
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .section-title .icon {
+            font-size: 1.2em;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .add-btn {
+            width: 100%;
+            padding: 15px 30px;
+            background: var(--red-gradient);
+            border: none;
+            border-radius: 12px;
+            color: var(--light);
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(255,45,85,0.3);
+        }
+
+        .add-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255,45,85,0.4);
+        }
+
+        .add-btn i {
+            font-size: 1.2em;
+        }
+
+        /* Estilos de items y lista */
+        .item-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .item {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            transition: var(--transition-smooth);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: itemAppear 0.3s ease-out;
+        }
+
+        @keyframes itemAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .item:hover {
+            transform: translateX(5px);
+            background: rgba(255,255,255,0.15);
+            border-color: var(--primary);
+        }
+
+        .item-content {
+            flex: 1;
+            margin-right: 15px;
+        }
+
+        .item-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--light);
+            margin-bottom: 8px;
+        }
+
+        .item-description {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-btn:hover {
+            background: var(--primary);
+            color: var(--light);
+            transform: rotate(90deg);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: rgba(255,255,255,0.5);
+            font-style: italic;
+            background: var(--glass-bg);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        /* Modal mejorado */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+            animation: modalAppear 0.3s ease-out;
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .modal-content {
+            background: var(--dark);
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            margin: auto;
+            position: relative;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .modal-title {
+            color: var(--light);
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-title i {
+            color: var(--primary);
+        }
+
+        .modal-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .modal-input-group input,
+        .modal-input-group textarea {
+            width: 100%;
+            padding: 15px;
+            background: var(--darker);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--light);
+            font-size: 1em;
+            transition: var(--transition-smooth);
+        }
+
+        .modal-input-group input:focus,
+        .modal-input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255,45,85,0.2);
+        }
+
+        .modal-input-group textarea {
+            height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .cancel-btn {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .cancel-btn:hover {
+            background: rgba(255,45,85,0.1);
+            transform: translateY(-2px);
+        }
+
+        .save-btn {
+            background: var(--red-gradient);
+            border: none;
+            color: var(--light);
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,45,85,0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                transform: translateY(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateY(0);
+            }
+
+            .section {
+                left: 0;
+                padding: 20px;
+            }
+
+            .section-content {
+                margin-top: 40px;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .item {
+                padding: 15px;
+            }
+
+            .back-btn {
+                top: 15px;
+                left: 15px;
+            }
+        }
+
+        /* Animaciones adicionales */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        </style>
+        </head>
+        <body>
+        <!-- Efectos de fondo -->
+        <div class="glow"></div>
+
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+        <div class="app-title">
+            <span class="icon">🎄</span>
+            <span>Christmas Manager</span>
+        </div>
+
+        <div class="menu-item active" data-section="bins">
+            <i class="icon fas fa-gift"></i>
+            <span class="text">Bins</span>
+        </div>
+
+        <div class="menu-item" data-section="tools">
+            <i class="icon fas fa-candy-cane"></i>
+            <span class="text">Tools</span>
+        </div>
+
+        <div class="menu-item" data-section="accounts">
+            <i class="icon fas fa-snowman"></i>
+            <span class="text">Accounts</span>
+        </div>
+
+        <div class="menu-item" data-section="settings">
+            <i class="icon fas fa-star"></i>
+            <span class="text">Settings</span>
+        </div>
+        </div>
+
+        <!-- Secciones -->
+        <div id="bins" class="section">
+        <button class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <div class="section-content">
+            <h2 class="section-title">
+                <i class="icon fas fa-gift"></i>
+                <span>Bins Manager</span>
+            </h2>
+            <button class="add-btn" onclick="showModal('bins')">
+                <i class="fas fa-plus"></i>
+                Add New Bin
+            </button>
+            <ul id="binsList" class="item-list"></ul>
+            <div class="empty-state">
+                <i class="fas fa-gift" style="font-size: 2em; margin-bottom: 15px; display: block;"></i>
+                No bins added yet
+            </div>
+        </div>
+        </div>
+                <!-- Sección Tools -->
+                <div id="tools" class="section">
+                    <button class="back-btn" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="section-content">
+                        <h2 class="section-title">
+                            <i class="icon fas fa-candy-cane"></i>
+                            <span>Tools Manager</span>
+                        </h2>
+                        <button class="add-btn" onclick="showModal('tools')">
+                            <i class="fas fa-plus"></i>
+                            Add New Tool
+                        </button>
+                        <ul id="toolsList" class="item-list"></ul>
+                        <div class="empty-state">
+                            <i class="fas fa-candy-cane" style="font-size: 2em; margin-bottom: 15px; display: block;"></i>
+                            No tools added yet
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Accounts -->
+                <div id="accounts" class="section">
+                    <button class="back-btn" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="section-content">
+                        <h2 class="section-title">
+                            <i class="icon fas fa-snowman"></i>
+                            <span>Accounts Manager</span>
+                        </h2>
+                        <button class="add-btn" onclick="showModal('accounts')">
+                            <i class="fas fa-plus"></i>
+                            Add New Account
+                        </button>
+                        <ul id="accountsList" class="item-list"></ul>
+                        <div class="empty-state">
+                            <i class="fas fa-snowman" style="font-size: 2em; margin-bottom: 15px; display: block;"></i>
+                            No accounts added yet
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Settings -->
+                <div id="settings" class="section">
+                    <button class="back-btn" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="section-content">
+                        <h2 class="section-title">
+                            <i class="icon fas fa-star"></i>
+                            <span>Settings Manager</span>
+                        </h2>
+                        <button class="add-btn" onclick="showModal('settings')">
+                            <i class="fas fa-plus"></i>
+                            Add New Setting
+                        </button>
+                        <ul id="settingsList" class="item-list"></ul>
+                        <div class="empty-state">
+                            <i class="fas fa-star" style="font-size: 2em; margin-bottom: 15px; display: block;"></i>
+                            No settings added yet
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal -->
+                <div id="modal" class="modal">
+                    <div class="modal-content">
+                        <h3 class="modal-title">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Add New Item</span>
+                        </h3>
+                        <div class="modal-input-group">
+                            <input type="text" id="modalServiceName" placeholder="Enter name...">
+                            <textarea id="modalServiceContent" placeholder="Enter description..."></textarea>
+                        </div>
+                        <div class="modal-buttons">
+                            <button onclick="closeModal()" class="modal-btn cancel-btn">Cancel</button>
+                            <button onclick="saveModalData()" class="modal-btn save-btn">Save</button>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    let currentSection = '';
+
+                    // Crear efecto de nieve
+                    function createSnowflakes() {
+                        const snowflakes = ['❄', '❅', '❆', '✺', '✵'];
+                        setInterval(() => {
+                            const snowflake = document.createElement('div');
+                            snowflake.className = 'snowflake';
+                            snowflake.style.left = Math.random() * 100 + 'vw';
+                            snowflake.style.animation = `snowfall ${Math.random() * 3 + 2}s linear forwards`;
+                            snowflake.textContent = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+                            document.body.appendChild(snowflake);
+
+                            setTimeout(() => snowflake.remove(), 5000);
+                        }, 200);
+                    }
+
+                    // Detector de dispositivo
+                    const isMobile = () => window.innerWidth <= 768;
+
+                    // Mostrar modal
+                    function showModal(section) {
+                        currentSection = section;
+                        const modal = document.getElementById('modal');
+                        modal.classList.add('active');
+                        document.getElementById('modalServiceName').value = '';
+                        document.getElementById('modalServiceContent').value = '';
+                        document.getElementById('modalServiceName').focus();
+                    }
+
+                    // Cerrar modal
+                    function closeModal() {
+                        document.getElementById('modal').classList.remove('active');
+                    }
+
+                    // Cambiar entre secciones
+                    document.querySelectorAll('.menu-item').forEach(item => {
+                        item.addEventListener('click', function() {
+                            const sectionId = this.dataset.section;
+                            const sidebar = document.getElementById('sidebar');
+                            const selectedSection = document.getElementById(sectionId);
+
+                            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                            this.classList.add('active');
+
+                            if (isMobile()) {
+                                sidebar.style.transform = 'translateY(-100%)';
+                            } else {
+                                sidebar.style.transform = 'translateX(-100%)';
+                            }
+
+                            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                            selectedSection.classList.add('active');
+                        });
+                    });
+
+                    // Función para volver
+                    function goBack() {
+                        const sidebar = document.getElementById('sidebar');
+
+                        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+                        if (isMobile()) {
+                            sidebar.style.transform = 'translateY(0)';
+                        } else {
+                            sidebar.style.transform = 'translateX(0)';
+                        }
+                    }
+
+                    // Guardar datos del modal
+                    function saveModalData() {
+                        const serviceName = document.getElementById('modalServiceName').value.trim();
+                        const serviceContent = document.getElementById('modalServiceContent').value.trim();
+
+                        if (serviceName) {
+                            const list = document.getElementById(`${currentSection}List`);
+
+                            const item = document.createElement('li');
+                            item.className = 'item';
+
+                            const itemContainer = document.createElement('div');
+                            itemContainer.className = 'item-content';
+
+                            const title = document.createElement('div');
+                            title.className = 'item-title';
+                            title.textContent = serviceName;
+
+                            const content = document.createElement('div');
+                            content.className = 'item-description';
+                            content.textContent = serviceContent;
+
+                            const deleteBtn = document.createElement('button');
+                            deleteBtn.className = 'delete-btn';
+                            deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                            deleteBtn.onclick = () => {
+                                item.style.transform = isMobile() ? 'translateX(50px)' : 'translateX(100px)';
+                                item.style.opacity = '0';
+                                setTimeout(() => item.remove(), 300);
+                                updateEmptyState(currentSection);
+                                saveItems(currentSection);
+                            };
+
+                            itemContainer.appendChild(title);
+                            if (serviceContent) {
+                                itemContainer.appendChild(content);
+                            }
+
+                            item.appendChild(itemContainer);
+                            item.appendChild(deleteBtn);
+                            list.appendChild(item);
+
+                            updateEmptyState(currentSection);
+                            closeModal();
+                            saveItems(currentSection);
+                        }
+                    }
+
+                    // Actualizar estado vacío
+                    function updateEmptyState(section) {
+                        const list = document.getElementById(`${section}List`);
+                        const emptyState = list.nextElementSibling;
+                        emptyState.style.display = list.children.length === 0 ? 'block' : 'none';
+                    }
+
+                    // Guardar en localStorage
+                    function saveItems(section) {
+                        const list = document.getElementById(`${section}List`);
+                        const items = Array.from(list.children).map(item => ({
+                            name: item.querySelector('.item-title').textContent,
+                            content: item.querySelector('.item-description')?.textContent || ''
+                        }));
+                        localStorage.setItem(`${section}Items`, JSON.stringify(items));
+                    }
+
+                    // Cargar desde localStorage
+                    function loadItems(section) {
+                        const items = JSON.parse(localStorage.getItem(`${section}Items`) || '[]');
+                        items.forEach(item => {
+                            currentSection = section;
+                            document.getElementById('modalServiceName').value = item.name;
+                            document.getElementById('modalServiceContent').value = item.content;
+                            saveModalData();
+                        });
+                    }
+
+                    // Inicialización
+                    window.addEventListener('load', () => {
+                        createSnowflakes();
+                        ['bins', 'tools', 'accounts', 'settings'].forEach(section => {
+                            loadItems(section);
+                            updateEmptyState(section);
+                        });
+                    });
+
+                    // Event Listeners
+                    document.getElementById('modal').addEventListener('click', (e) => {
+                        if (e.target === document.getElementById('modal')) {
+                            closeModal();
+                        }
+                    });
+
+                    window.addEventListener('resize', () => {
+                        const sidebar = document.getElementById('sidebar');
+                        sidebar.style.transform = 'translateX(0)';
+                    });
+                </script>
+            </body>
+            </html>
